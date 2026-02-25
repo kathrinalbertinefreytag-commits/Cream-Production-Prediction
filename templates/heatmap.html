@@ -1,0 +1,38 @@
+<!Doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Heatmap Creamquality</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> 
+    <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">   
+</head>
+<body>
+    <h1>Heatmap: Creamquality</h1>
+    <form method="POST">
+        <label>X-axis:</label>
+        <select name="x_param">
+            <option value="temperature" {% if x_param == 'temperature' %} 
+            selected{% endif %} >Temperature</option>
+            <option value="fat_content" {% if x_param == 'fat_content' %}
+            selected{% endif %}>Oil fraction</option>
+            <option value="water_content" {% if x_param == 'water_content' %}selected{% endif%}>Water fraction</option>
+                </select>
+
+                <label>Y-axis:</label>
+                <select name="y_param">
+                    <option value="temperature" {% if y_param == 'temperature' %}selected{% endif %}>Temperature</option>
+                    <option value="fat_content" {% if y_param == 'fat_content' %}
+                    selected{% endif %}>Oil fraction</option>
+                    <option value="water_content" {% if y_param == 'water_content' %}selected{% endif%}>Water fraction</option>
+                    </select>
+            
+                    <button type="submit">actualize</button>
+                    </form>
+                <div id="heatmap"></div>
+                <script type="text/javascript">
+                    var graphs = {{ graphJson | safe }};
+                    Plotly.newPlot('heatmap', graphs.data, graphs.layout);
+                </script>
+                <a href="{{ url_for('home')}}">back to prediction</a>
+      </body>
+      </html>
