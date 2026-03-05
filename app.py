@@ -6,8 +6,8 @@ import numpy as np
 import joblib
 import json
 import plotly
-import plotly.graph_objs as go
-
+from dash import Dash, dcc, html, Input, Output
+import plotly.graph_objects as go
 
 print("Flask starts")
 
@@ -18,7 +18,9 @@ app.secret_key = "supersecretkey"
 pipeline = joblib.load("logistic_model.pkl")
 
 le = joblib.load("label_encoder.pkl")
-print("Classes:", le.classes_)
+#print("Classes:", le.classes_)
+for index, label in enumerate(le.classes_):
+    print(index, "=", label)
 
 base_features = {
     "mixing_time": 15,
@@ -37,6 +39,8 @@ def home():
     print("Route called")
     message = ""
     form_values = base_features.copy()
+    quality_pred = None
+    prediction_label = None
 
     if request.method == "POST":
         try:
@@ -46,13 +50,16 @@ def home():
             features_df = pd.DataFrame([form_values], columns=feature_order)
 
             quality_pred = pipeline.predict(features_df)[0]
+            prediction_label = le.inverse_transform([quality_pred])[0]
+
+
 
             message = f"Prediction of cream quality: {quality_pred:.2f}"
 
         except Exception as e:
             message = f"Error: {e}"
 
-    return render_template("home.html", message=message, form_values=form_values)
+    return render_template("home.html", message=message, form_values=form_values, quality_pred=prediction_label, prediction_label=prediction_label)
 
     
 #heatmap
@@ -68,7 +75,7 @@ def heatmap():
         "ph_value": 7.0
     }
 
-    x_param = request. form.get("x_param", "temperature")
+    x_param = request.form.get("x_param", "temperature")
     y_param = request.form.get("y_param", "fat_content")
 
     x_values = np.linspace(50, 90, 20)
@@ -87,7 +94,7 @@ def heatmap():
 
             features_df = pd.DataFrame([temp_features], columns=feature_order)
 
-            heatmap_matrix[i, j] = pipeline.predict(features_df)[0]
+            heatmap_matrix[i, j] = pipeline.predict_proba(features_df)[0][1]
 
 
     fig = go.Figure(
@@ -109,9 +116,15 @@ def heatmap():
     print("Heatmap max:", np.max(heatmap_matrix))
  
 
-    return render_template( "heatmap.html", x_param=x_param,
-                            y_param=y_param, x_values=x_values, y_values=y_values,
-                            heatmap_matrix=heatmap_matrix, graphJson=graphJson)
+    return render_template(
+    "heatmap.html",
+    x_param=x_param,
+    y_param=y_param,
+    x_values=x_values,
+    y_values=y_values,
+    heatmap_matrix=heatmap_matrix,
+    graphJson=graphJson
+)
 
 if __name__== "__main__":
     app.run(debug=True)

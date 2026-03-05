@@ -49,6 +49,22 @@
 <p>{{message}}</p>
 {% endif %}
 
+{% if quality_pred is defined and quality_pred is not none %}
+
+    {% set color =
+        'green' if quality_pred == 'good'
+        else 'goldenrod' if quality_pred == 'medium'
+        else 'red'
+    %}
+
+    <span style="color: {{ color }};">
+        {{ quality_pred }}
+    </span>
+
+{% endif %}
+
+<br></br>
+
 <a href="{{ url_for ('heatmap') }} ">to the heatmap</a>
 
 </body>
