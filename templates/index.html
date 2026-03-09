@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prompt Tester</title>
+</head>
+<body>
+
+<h1>give a Prompt </h1>
+
+<form method="POST">
+    <textarea name="prompt" rows="10" cols="60" placeholder="Prompt here"></textarea>
+    <br><br>
+    <button type="submit">send</button>
+</form>
+
+{% if response %}
+<h2>Answer:</h2>
+<p>{{ response }}</p>
+{% endif %}
+
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Meine Seite</title>
+</head>
+<body>
+  <svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hintergrund -->
+  <rect width="800" height="600" fill="white"/>
+
+  <!-- Features Box -->
+  <rect x="20" y="20" width="200" height="200" fill="#B3E5FC" stroke="#0288D1" stroke-width="2"/>
+  <text x="30" y="40" font-size="16" font-weight="bold">Features</text>
+  <text x="30" y="70">mixing_time (β=0.3)</text>
+  <text x="30" y="95">temperature (β=0.1)</text>
+  <text x="30" y="120">stirring_speed (β=0.02)</text>
+  <text x="30" y="145">fat_content (β=0.5)</text>
+  <text x="30" y="170">water_content (β=-0.2)</text>
+  <text x="30" y="195">ph_value (β=0.8)</text>
+
+  <!-- Pfeil zu z -->
+  <line x1="220" y1="120" x2="320" y2="120" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Linearkombination z -->
+  <rect x="320" y="70" width="180" height="100" fill="#C8E6C9" stroke="#2E7D32" stroke-width="2"/>
+  <text x="330" y="90" font-size="16" font-weight="bold">z = β0 + Σβi*xi</text>
+  <text x="330" y="120">z = 12.29</text>
+
+  <!-- Pfeil zu Sigmoid -->
+  <line x1="500" y1="120" x2="600" y2="120" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Sigmoid -->
+  <rect x="600" y="70" width="150" height="100" fill="#FFECB3" stroke="#F9A825" stroke-width="2"/>
+  <text x="610" y="90" font-size="16" font-weight="bold">Sigmoid</text>
+  <text x="610" y="120">p = 1 / (1 + e^-z)</text>
+  <text x="610" y="140">p = 0.999995</text>
+
+  <!-- Pfeil zu Vorhersage -->
+  <line x1="675" y1="170" x2="675" y2="230" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Vorhersage -->
+  <rect x="600" y="230" width="150" height="60" fill="#FFCDD2" stroke="#D32F2F" stroke-width="2"/>
+  <text x="610" y="260" font-size="16" font-weight="bold">Vorhersage</text>
+  <text x="610" y="280">good</text>
+
+  <!-- Odds Box -->
+  <rect x="320" y="230" width="250" height="200" fill="#E1BEE7" stroke="#6A1B9A" stroke-width="2"/>
+  <text x="330" y="260" font-size="16" font-weight="bold">Odds-Multiplikatoren</text>
+  <text x="330" y="290">mixing_time: e^β = 1.35 -> +35%</text>
+  <text x="330" y="315">temperature: e^β = 1.11 -> +11%</text>
+  <text x="330" y="340">stirring_speed: e^β = 1.02 -> +2%</text>
+  <text x="330" y="365">fat_content: e^β = 1.65 -> +65%</text>
+  <text x="330" y="390">water_content: e^β = 0.82 -> -18%</text>
+  <text x="330" y="415">ph_value: e^β = 2.23 -> +123%</text>
+
+  <!-- Pfeil Definition -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="black"/>
+    </marker>
+  </defs>
+</svg>
+</body>
+</html>

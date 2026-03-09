@@ -1,0 +1,37 @@
+body {
+    font-family: Tinos, sans_serif;
+    margin: 20px;
+}
+form label {
+    display: block;
+    margin-top: 10px;
+}
+input, select {
+    margin-bottom: 10px;
+}
+button {
+    margin-top: 10px;
+    padding: 5px 10px;
+}
+
+/* Container für das gesamte Formular */
+.container {
+    display: flex;
+    flex-direction: column; /* Elemente untereinander */
+    gap: 10px;              /* Abstand zwischen Zeilen */
+    width: 350px;           /* optional: feste Breite */
+}
+
+/* Jede Zeile: Label + Input */
+.form-row {
+    display: flex;
+    align-items: left;
+    gap: 50px;              /* Abstand zwischen Label und Input */
+}
+
+/* Labels rechtsbündig, gleiche Breite */
+.form-row label {
+    width: 150px;            /* feste Breite */
+    text-align: right;       /* rechtsbündig */
+}
+

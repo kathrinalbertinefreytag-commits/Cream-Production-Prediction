@@ -1,0 +1,71 @@
+<!Doctype html>
+<html lang="eng">
+<head>
+    <meta charset="UTF-8">
+    <title>Cream Quality Prediction</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
+</head>
+<body>
+<h1>Cream Quality Prediction</h1>
+
+   <div class="container"> 
+        <form method="POST" action="/">
+            <div class="form-row">
+                <label for="mixing_time">Mixing Time (min)</label>
+                <input type="number" name="mixing_time" id="mixing_time" step="0.1" required
+                value="{{request.form.mixing_time}}">
+            </div>
+            <div class="form-row">
+                <label for="temperature">Temperature (°C)</label>
+                <input type="number" name="temperature" id="temperature" step="0.1" required
+                value="{{request.form.temperature}}">
+            </div>
+            <div class="form-row">
+                <label for="stirring_speed">Stirring Speed (rpm)</label>
+                <input type="number" name="stirring_speed" id="stirring_speed" step="1" required
+                value="{{request.form.stirring_speed}}">
+            </div>
+            <div class="form-row">
+                <label for="fat_content">Fat Content (%)</label>
+                <input type="number" name="fat_content" id="fat_content" step="0.1" required
+                value="{{request.form.fat_content}}">
+            </div>
+            <div class="form-row">
+                <label for="water_content">Water Content (%)</label>
+                <input type="number" name="water_content" id="water_content" step="0.1" required
+                value="{{request.form.water_content}}">
+            </div>
+            <div class="form-row">
+               <label for="ph_value">pH Value</label>
+               <input type="number" name="ph_value" id="ph_value" step="0.1" required
+                value="{{request.form.ph_value}}">
+            </div>
+
+            <button type="submit">Calculate Prediction</button>
+        </form>
+    </div>
+
+{% if message %}
+<p>{{message}}</p>
+{% endif %}
+
+{% if quality_pred is defined and quality_pred is not none %}
+
+    {% set color =
+        'green' if quality_pred == 'good'
+        else 'goldenrod' if quality_pred == 'medium'
+        else 'red'
+    %}
+
+    <span style="color: {{ color }};">
+        {{ quality_pred }}
+    </span>
+
+{% endif %}
+
+<br></br>
+
+<a href="{{ url_for ('heatmap') }} ">to the heatmap</a>
+
+</body>
+</html>
