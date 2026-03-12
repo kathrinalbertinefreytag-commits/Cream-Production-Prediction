@@ -1,6 +1,6 @@
 # wann und wo 
 # X_new_scaled = scaler.transform(X_new)
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import pandas as pd
 import numpy as np
 import joblib
@@ -70,7 +70,6 @@ def home():
 
     
 #heatmap
-from flask import Flask, request, jsonify
 def predict_cream_quality(params):
     df = pd.DataFrame([params])[feature_order]
     pred = pipeline.predict(df)[0]
@@ -144,26 +143,32 @@ def heatmap():
 
     return jsonify({"matrix": matrix})"""
 
-@app.route("/heatmap", methods=["GET","POST"])
+@app.route("/heatmap", methods=["GET", "POST"])
 def heatmap():
 
+    # Standardwerte nur für GET
     x_param = "temperature"
     y_param = "fat_content"
 
     if request.method == "POST":
-        x_param = request.form.get("x_param")
-        y_param = request.form.get("y_param")
+        x_param = request.form.get("x_param", x_param) or x_param
+        y_param = request.form.get("y_param", y_param) or y_param
 
-    x_labels = ["A", "B", "C", "D", "E"]
-    y_labels = ["V", "W", "X", "Y", "Z"]
+    # Matrix erzeugen
+    matrix = generate_heatmap_matrix(x_param, y_param)
 
-    matrix = [
-        [1,2,3,4,5],
-        [5,4,3,2,1],
-        [2,3,4,5,6],
-        [6,5,4,3,2],
-        [1,3,5,7,9]
-    ]
+    # Labels aus Ranges
+    ranges = {
+        "mixing_time": [5,10,15,20,25],
+        "temperature": [50,60,70,80,90],
+        "stirring_speed": [100,200,300,400,500],
+        "fat_content": [5,10,15,20],
+        "water_content": [60,70,80,90],
+        "ph_value": [5.5,6,6.5,7,7.5]
+    }
+
+    x_labels = ranges[x_param]
+    y_labels = ranges[y_param]
 
     fig = go.Figure(
         data=go.Heatmap(
@@ -204,7 +209,8 @@ def index():
         )
 
         response_text = response.choices[0].message.content
-
+    print("DEBUG Params:", params)
+    print("Prediction:", score)
     return render_template("index.html", response=response_text)
 
 
