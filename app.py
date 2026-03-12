@@ -70,68 +70,124 @@ def home():
 
     
 #heatmap
-@app.route("/heatmap", methods=["GET", "POST"])
-def heatmap():
-    print("Heatmap Route Called")
-    base_features = {
-        "mixing_time": 15,
-        "temperature": 70,
-        "stirring_speed": 300,
-        "fat_content": 10,
-        "water_content": 80,
-        "ph_value": 7.0
+from flask import Flask, request, jsonify
+def predict_cream_quality(params):
+    df = pd.DataFrame([params])[feature_order]
+    pred = pipeline.predict(df)[0]
+    return int(pred)
+
+def generate_heatmap_matrix(x_param, y_param, fixed_params=None):
+    if fixed_params is None:
+        fixed_params = {}
+
+    ranges = {
+        "mixing_time": [5, 10, 15, 20, 25],
+        "temperature": [50, 60, 70, 80, 90],
+        "stirring_speed": [100, 200, 300, 400, 500],
+        "fat_content": [5, 10, 15, 20],
+        "water_content": [60, 70, 80, 90],
+        "ph_value": [5.5, 6, 6.5, 7, 7.5]
     }
 
-    x_param = request.form.get("x_param", "temperature")
-    y_param = request.form.get("y_param", "fat_content")
+    x_values = ranges.get(x_param)
+    y_values = ranges.get(y_param)
 
-    x_values = np.linspace(50, 90, 20)
-    y_values = np.linspace(5, 20, 20)
-    
-    
-    heatmap_matrix = np.zeros((len(y_values), len(x_values)))
-    keys = list(base_features.keys())
+    defaults = {feature: base_features[feature] for feature in feature_order}
+    base_params = {**defaults}
 
-    for i, y_val in enumerate(y_values):
-        for j, x_val in enumerate(x_values):
+    # Wandle fixed_params in floats um
+    for key, val in fixed_params.items():
+        try:
+            base_params[key] = float(val)
+        except:
+            base_params[key] = defaults.get(key, 0.0)
 
-            temp_features = base_features.copy()
-            temp_features[x_param] = x_val
-            temp_features[y_param] = y_val
+    matrix = []
 
-            features_df = pd.DataFrame([temp_features], columns=feature_order)
+    for y in reversed(y_values):
+        row = []
+        for x in x_values:
+            params = base_params.copy()
+            params[x_param] = float(x)
+            params[y_param] = float(y)
 
-            heatmap_matrix[i, j] = pipeline.predict_proba(features_df)[0][1]
+            # DEBUG
+            print("DEBUG Params:", params)
 
+            score = predict_cream_quality(params)
+            row.append(score)
+        matrix.append(row)
+
+    return matrix
+
+
+"""@app.route("/heatmap", methods=["GET","POST"])
+def heatmap():
+    if request.is_json:
+        data = request.get_json()
+    else:
+        data = request.form
+
+    x_param = data.get("x_param", "temperature")
+    y_param = data.get("y_param", "ph_value")
+
+    # fixed_params richtig parsen, falls es ein String aus Formular ist
+    fixed_params = data.get("fixed_params", {})
+    if isinstance(fixed_params, str):
+        # z.B. "{}" oder "fat_content=10"
+        try:
+            fixed_params = json.loads(fixed_params)
+        except:
+            fixed_params = {}
+
+    matrix = generate_heatmap_matrix(x_param, y_param, fixed_params)
+
+    return jsonify({"matrix": matrix})"""
+
+@app.route("/heatmap", methods=["GET","POST"])
+def heatmap():
+
+    x_param = "temperature"
+    y_param = "fat_content"
+
+    if request.method == "POST":
+        x_param = request.form.get("x_param")
+        y_param = request.form.get("y_param")
+
+    x_labels = ["A", "B", "C", "D", "E"]
+    y_labels = ["V", "W", "X", "Y", "Z"]
+
+    matrix = [
+        [1,2,3,4,5],
+        [5,4,3,2,1],
+        [2,3,4,5,6],
+        [6,5,4,3,2],
+        [1,3,5,7,9]
+    ]
 
     fig = go.Figure(
-        data = go.Heatmap(
-            z=heatmap_matrix,
-            x=x_values,
-            y=y_values,
-            colorscale='Viridis'
-            )
+        data=go.Heatmap(
+            z=matrix,
+            x=x_labels,
+            y=y_labels,
+            colorscale="Viridis"
         )
+    )
+
+    fig.update_layout(
+        title="Cream Quality Heatmap",
+        xaxis_title=x_param,
+        yaxis_title=y_param
+    )
 
     graphJson = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    
-    #fig = go.Figure(data=go.Heatmap(z=heatmap_matrix,x=x_values,y=y_values, colorscale='Viridis'))
-
-    graphJson = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    
-    print("Heatmap min:", np.min(heatmap_matrix))
-    print("Heatmap max:", np.max(heatmap_matrix))
- 
 
     return render_template(
-    "heatmap.html",
-    x_param=x_param,
-    y_param=y_param,
-    x_values=x_values,
-    y_values=y_values,
-    heatmap_matrix=heatmap_matrix,
-    graphJson=graphJson
-)
+        "heatmap.html",
+        graphJson=graphJson,
+        x_param=x_param,
+        y_param=y_param
+    )
 
 @app.route("/further", methods=["GET", "POST"])
 def index():
