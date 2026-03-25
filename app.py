@@ -1,8 +1,11 @@
 # wann und wo 
 # X_new_scaled = scaler.transform(X_new)
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import joblib
 import json
 import plotly
@@ -11,6 +14,10 @@ import plotly.graph_objects as go
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
+import seaborn as sns
+import io
+import base64
+from pydantic import BaseModel
 print("Flask starts")
 
 load_dotenv()
@@ -30,19 +37,22 @@ for index, label in enumerate(le.classes_):
     print(index, "=", label)
 
 base_features = {
-    "mixing_time": 15,
+    "mixing_time": 40,
     "temperature": 70,
     "stirring_speed": 300,
-    "fat_content": 10,
-    "water_content": 80,
-    "ph_value": 7.0
+    "fat_content": 30,
+    "water_content": 70,
+    "ph_value": 5.0
 }
 
 feature_order = list(base_features.keys())
+features_df = pd.DataFrame([], columns=feature_order)
+
 
 #starting page
 @app.route("/", methods=["GET", "POST"])
 def home():
+    global features_df
     print("Route called")
     message = ""
     form_values = base_features.copy()
@@ -52,10 +62,15 @@ def home():
     if request.method == "POST":
         try:
             for key in feature_order:
-                form_values[key] = float(request.form.get(key, 0))
+                value = request.form.get(key)
+
+                if value == "" or value is None:
+                    form_values[key] = base_features[key]
+                else:
+                    form_values[key] = float(value)
 
             features_df = pd.DataFrame([form_values], columns=feature_order)
-
+            print(features_df)
             quality_pred = pipeline.predict(features_df)[0]
             prediction_label = le.inverse_transform([quality_pred])[0]
 
@@ -119,6 +134,24 @@ def generate_heatmap_matrix(x_param, y_param, fixed_params=None):
 
     return matrix
 
+"""#banana
+# Parameterbereich
+fett = np.linspace(20, 30, 50)       # Fettgehalt %
+temp = np.linspace(40, 60, 50)       # Temperatur °C
+
+# Meshgrid erstellen
+F, T = np.meshgrid(fett, temp)
+
+# Banane / elliptisches Optimum simulieren
+# Score = exp(-a*(F-F_opt)^2 - b*(T-T_opt(F))^2)
+F_opt = 25
+# Temperaturziel hängt leicht vom Fett ab → Banane
+T_opt = 50 + 0.3*(F - F_opt)
+
+a = 0.2   # Fettgewichtung
+b = 0.3   # Temperaturgewichtung
+
+Score = np.exp(-a*(F - F_opt)**2 - b*(T - T_opt)**2)"""
 
 """@app.route("/heatmap", methods=["GET","POST"])
 def heatmap():
@@ -150,9 +183,13 @@ def heatmap():
     x_param = "temperature"
     y_param = "fat_content"
 
+    print(x_param, y_param)
+
     if request.method == "POST":
         x_param = request.form.get("x_param", x_param) or x_param
         y_param = request.form.get("y_param", y_param) or y_param
+
+        print(f"hallo!",x_param, y_param)
 
     # Matrix erzeugen
     matrix = generate_heatmap_matrix(x_param, y_param)
@@ -203,16 +240,14 @@ def index():
 
         response = client.chat.completions.create(
             model="gpt-5-mini",
-            messages=[
+            messages=[ {"role": "system", "content":f"Concearning the production of cosmetic cream: Please give further informations concearning the features_df{features_df}"},
                 {"role": "user", "content": prompt}
             ]
         )
 
         response_text = response.choices[0].message.content
-    print("DEBUG Params:", params)
-    print("Prediction:", score)
     return render_template("index.html", response=response_text)
-
+    
 
 if __name__== "__main__":
     app.run(debug=True)
