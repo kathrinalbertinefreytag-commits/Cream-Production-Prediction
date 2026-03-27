@@ -240,7 +240,26 @@ def index():
 
         response = client.chat.completions.create(
             model="gpt-5-mini",
-            messages=[ {"role": "system", "content":f"Concearning the production of cosmetic cream: Please give further informations concearning the features_df{features_df}"},
+            messages=[ {"role": "system", "content":f"""You are a cosmetic formulation expert specializing in the production of cosmetic creams.
+
+                        Analyze the following dataset or feature description: {features_df}
+
+                        Your task:
+                        1. Explain the key characteristics and implications of the provided features in the context of cosmetic cream production.
+                        2. Describe how these features influence formulation, stability, texture, and performance.
+                        3. Highlight any potential issues or considerations (e.g., compatibility, safety, or regulatory aspects).
+                     
+                        Output format:
+                        - keep it short (max 80 tokens)
+                        - Use clear headings
+                        - Provide structured bullet points where appropriate
+                        - Keep explanations precise but informative
+
+                        Additionally:
+                        - Provide up to 5 high-quality references (scientific, industry, or authoritative sources)
+                        - Format them as clickable links (Markdown format)
+
+                        Keep the tone professional and technical, but understandable."""},
                 {"role": "user", "content": prompt}
             ]
         )
