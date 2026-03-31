@@ -52,8 +52,8 @@
 {% if quality_pred is defined and quality_pred is not none %}
 
     {% set color =
-        'green' if quality_pred == 'gut'
-        else 'yellow' if quality_pred == 'mittel'
+        'green' if quality_pred == 'good'
+        else 'yellow' if quality_pred == 'mediocre'
         else 'red'
     %}
 
@@ -71,6 +71,6 @@
 
 <br></br>
 
-<a href="{{url_for ('index')}}">further information</a>
+<a href="{{url_for ('index')}}">how do I improve this batch?</a>
 </body>
 </html>

@@ -14,7 +14,7 @@ def prepare_data(path):
 #Qualification, 3 Labels
     y = df["quality_label"]
 
-# 0= schlecht, 1=mittel, 2=gut
+# 0= bad, 1=mediocre, 2=good
     le = LabelEncoder()
     y = le.fit_transform(y)
 

@@ -6,7 +6,7 @@ from sklearn.linear_model import LogisticRegression
 import joblib
 
 # pull Data
-X, y, le = prepare_data("data/cream_quality_data.csv")
+X, y, le = prepare_data("data/cream_quality_data_english.csv")
 
 # Split
 X_train, X_test, y_train, y_test = train_test_split(

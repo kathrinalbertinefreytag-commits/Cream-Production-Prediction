@@ -14,7 +14,7 @@ def generate_cream_data(n_samples=1000):
         water_content = np.random.uniform(50, 90)       # %
         ph_value = np.random.uniform(4.5, 7.5)
 
-        # Konsistenz (1–10)
+        # consistency (1–10)
         consistency = (
             0.25 * mixing_time
             + 0.2 * fat_content
@@ -26,7 +26,7 @@ def generate_cream_data(n_samples=1000):
 
         consistency = np.clip(consistency, 1, 10)
 
-        # Feuchtigkeit (%)
+        # humidity (%)
         moisture = (
             0.6 * water_content
             - 0.2 * fat_content
@@ -34,7 +34,7 @@ def generate_cream_data(n_samples=1000):
         )
         moisture = np.clip(moisture, 40, 95)
 
-        # Farbe (0–100, höher = heller)
+        # colour (0–100, höher = heller)
         color = (
             80
             - 0.4 * fat_content
@@ -43,15 +43,15 @@ def generate_cream_data(n_samples=1000):
         )
         color = np.clip(color, 20, 95)
 
-        # Qualitätslabel
+        # quality label
         quality_score = (consistency + (color / 10)) / 2
 
-        if quality_score >= 5:
-            quality_label = "gut"
-        elif quality_score >= 4:
-            quality_label = "mittel"
+        if quality_score >= 7:
+            quality_label = "good"
+        elif quality_score >= 5:
+            quality_label = "mediocre"
         else:
-            quality_label = "schlecht"
+            quality_label = "bad"
 
         data.append([
             mixing_time, temperature, stirring_speed,
@@ -68,8 +68,8 @@ def generate_cream_data(n_samples=1000):
     return pd.DataFrame(data, columns=columns)
 
 
-# Beispiel: 3000 Trainingsdaten erzeugen
+# example: 3000 trainingsdata created
 df = generate_cream_data(3000)
-df.to_csv("cream_quality_data.csv", index=False)
+df.to_csv("cream_quality_data_english.csv", index=False)
 
 print(df.head(100))

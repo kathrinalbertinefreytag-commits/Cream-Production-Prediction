@@ -76,7 +76,7 @@ def home():
 
 
 
-            message = f"Prediction of cream quality: {quality_pred:.2f}"
+            message = f"Prediction of cream quality: Your creme has the quality-score {quality_pred:.2f} what means it is:"
 
         except Exception as e:
             message = f"Error: {e}"

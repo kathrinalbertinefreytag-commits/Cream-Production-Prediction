@@ -7,7 +7,7 @@ le = joblib.load("label_encoder.pkl")
 
 # preparing Test Data
 from data_preparation import prepare_data
-X_test, y_test, _ = prepare_data("data/cream_quality_data.csv")
+X_test, y_test, _ = prepare_data("data/cream_quality_data_english.csv")
 # Achtung: prepare_data sollte hier die Testdaten **nicht mischen**!
 
 # Prediction & Evaluation

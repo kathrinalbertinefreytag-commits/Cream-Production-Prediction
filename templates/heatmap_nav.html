@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Creme-Heatmap</title>
+</head>
+<body>
+    <h1>Creme-Qualitäts-Heatmap</h1>
+    <img src="data:image/png;base64,{{ heatmap_data }}" alt="Heatmap">
+    <br><br>
+    <a href="{{ url_for('home') }}">
+        <button>back to prediction(home)</button>
+    </a>
+</body>
+</html>

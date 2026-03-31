@@ -6,11 +6,11 @@ import seaborn as sns
 sns.set(style="whitegrid")
 
 # load data
-df = pd.read_csv("data/cream_quality_data.csv")
+df = pd.read_csv("data/cream_quality_data_english.csv")
 
 # classification
 sns.countplot(x="quality_label", data=df)
-plt.title("Verteilung der Qualitätsklassen")
+plt.title("Spreading of Quality Classes")
 plt.show()
 
 # feature distribution
