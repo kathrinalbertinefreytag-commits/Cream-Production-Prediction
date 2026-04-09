@@ -17,7 +17,9 @@ import os
 import seaborn as sns
 import io
 import base64
-from pydantic import BaseModel
+from flask import Flask, request, jsonify, render_template
+from rag_cosmetic.rag_chain import ask_rag  
+
 print("Flask starts")
 
 load_dotenv()
@@ -26,7 +28,9 @@ app = Flask(__name__)
 app.secret_key = "supersecretkey"
 api_key = os.getenv("OPENAI_API_KEY")
 
+
 client = OpenAI(api_key=api_key)
+
 
 #loading model and scaler
 pipeline = joblib.load("logistic_model.pkl")
@@ -266,7 +270,20 @@ def index():
 
         response_text = response.choices[0].message.content
     return render_template("index.html", response=response_text)
-    
+
+@app.route("/further_rag", methods=["GET", "POST"])
+def further_rag():
+    response = None
+
+    if request.method == "POST":
+        user_query = request.form.get("prompt")
+
+        if user_query:
+            response = ask_rag(user_query)
+
+    return render_template("index.html", response=response)
+
+
 
 if __name__== "__main__":
     app.run(debug=True)

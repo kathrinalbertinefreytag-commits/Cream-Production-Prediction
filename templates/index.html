@@ -16,6 +16,13 @@
 {% if response %}
 <h2>Answer:</h2>
 <p>{{ response }}</p>
+
+<h3>Sources:</h3>
+<ul>
+    {% for source in response.sources %}
+    <li>{{ source }}</li>
+    {% endfor %}
+</ul>
 {% endif %}
 
 </body>
