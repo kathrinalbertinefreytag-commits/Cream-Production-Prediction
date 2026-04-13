@@ -19,13 +19,16 @@ import io
 import base64
 from flask import Flask, request, jsonify, render_template
 from rag_cosmetic.rag_chain import ask_rag  
+from app_data import base_features, PARAMETER_MAP
+from app_prompt import detect_parameter, build_focus_schema, Full_Cream_Schema
+from app_predict import generate_heatmap_matrix
 
 print("Flask starts")
 
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"
+app.secret_key = os.getenv("SECRET_KEY")
 api_key = os.getenv("OPENAI_API_KEY")
 
 
@@ -40,17 +43,11 @@ le = joblib.load("label_encoder.pkl")
 for index, label in enumerate(le.classes_):
     print(index, "=", label)
 
-base_features = {
-    "mixing_time": 40,
-    "temperature": 70,
-    "stirring_speed": 300,
-    "fat_content": 30,
-    "water_content": 70,
-    "ph_value": 5.0
-}
 
 feature_order = list(base_features.keys())
 features_df = pd.DataFrame([], columns=feature_order)
+
+
 
 
 #starting page
@@ -88,97 +85,8 @@ def home():
     return render_template("home.html", message=message, form_values=form_values, quality_pred=prediction_label, prediction_label=prediction_label)
 
     
-#heatmap
-def predict_cream_quality(params):
-    df = pd.DataFrame([params])[feature_order]
-    pred = pipeline.predict(df)[0]
-    return int(pred)
 
-def generate_heatmap_matrix(x_param, y_param, fixed_params=None):
-    if fixed_params is None:
-        fixed_params = {}
 
-    ranges = {
-        "mixing_time": [5, 10, 15, 20, 25],
-        "temperature": [50, 60, 70, 80, 90],
-        "stirring_speed": [100, 200, 300, 400, 500],
-        "fat_content": [5, 10, 15, 20],
-        "water_content": [60, 70, 80, 90],
-        "ph_value": [5.5, 6, 6.5, 7, 7.5]
-    }
-
-    x_values = ranges.get(x_param)
-    y_values = ranges.get(y_param)
-
-    defaults = {feature: base_features[feature] for feature in feature_order}
-    base_params = {**defaults}
-
-    # Wandle fixed_params in floats um
-    for key, val in fixed_params.items():
-        try:
-            base_params[key] = float(val)
-        except:
-            base_params[key] = defaults.get(key, 0.0)
-
-    matrix = []
-
-    for y in reversed(y_values):
-        row = []
-        for x in x_values:
-            params = base_params.copy()
-            params[x_param] = float(x)
-            params[y_param] = float(y)
-
-            # DEBUG
-            print("DEBUG Params:", params)
-
-            score = predict_cream_quality(params)
-            row.append(score)
-        matrix.append(row)
-
-    return matrix
-
-"""#banana
-# Parameterbereich
-fett = np.linspace(20, 30, 50)       # Fettgehalt %
-temp = np.linspace(40, 60, 50)       # Temperatur °C
-
-# Meshgrid erstellen
-F, T = np.meshgrid(fett, temp)
-
-# Banane / elliptisches Optimum simulieren
-# Score = exp(-a*(F-F_opt)^2 - b*(T-T_opt(F))^2)
-F_opt = 25
-# Temperaturziel hängt leicht vom Fett ab → Banane
-T_opt = 50 + 0.3*(F - F_opt)
-
-a = 0.2   # Fettgewichtung
-b = 0.3   # Temperaturgewichtung
-
-Score = np.exp(-a*(F - F_opt)**2 - b*(T - T_opt)**2)"""
-
-"""@app.route("/heatmap", methods=["GET","POST"])
-def heatmap():
-    if request.is_json:
-        data = request.get_json()
-    else:
-        data = request.form
-
-    x_param = data.get("x_param", "temperature")
-    y_param = data.get("y_param", "ph_value")
-
-    # fixed_params richtig parsen, falls es ein String aus Formular ist
-    fixed_params = data.get("fixed_params", {})
-    if isinstance(fixed_params, str):
-        # z.B. "{}" oder "fat_content=10"
-        try:
-            fixed_params = json.loads(fixed_params)
-        except:
-            fixed_params = {}
-
-    matrix = generate_heatmap_matrix(x_param, y_param, fixed_params)
-
-    return jsonify({"matrix": matrix})"""
 
 @app.route("/heatmap", methods=["GET", "POST"])
 def heatmap():
@@ -237,44 +145,135 @@ def heatmap():
 
 @app.route("/further", methods=["GET", "POST"])
 def index():
-    response_text = None
-
+    data = None
+    references = []
+    
     if request.method == "POST":
-        prompt = request.form["prompt"]
+        user_prompt = request.form["prompt"]
+        detected = detect_parameter(user_prompt)
 
-        response = client.chat.completions.create(
-            model="gpt-5-mini",
-            messages=[ {"role": "system", "content":f"""You are a cosmetic formulation expert specializing in the production of cosmetic creams.
+        
+        #  Focusmode
+    
+        if len(detected) == 1:
+            mode = "focus"
+            target_param = detected[0]
 
-                        Analyze the following dataset or feature description: {features_df}
+            schema = build_focus_schema()
 
-                        Your task:
-                        1. Explain the key characteristics and implications of the provided features in the context of cosmetic cream production.
-                        2. Describe how these features influence formulation, stability, texture, and performance.
-                        3. Highlight any potential issues or considerations (e.g., compatibility, safety, or regulatory aspects).
-                     
-                        Output format:
-                        - keep it short (max 80 tokens)
-                        - Use clear headings
-                        - Provide structured bullet points where appropriate
-                        - Keep explanations precise but informative
+            system_prompt = f"""
+            You are a cosmetic formulation expert.
 
-                        Additionally:
-                        - Provide up to 5 high-quality references (scientific, industry, or authoritative sources)
-                        - Format them as clickable links (Markdown format)
+            Focus ONLY on the parameter: {target_param}.
 
-                        Keep the tone professional and technical, but understandable."""},
-                {"role": "user", "content": prompt}
-            ]
-        )
+            Analyze its effect on formulation quality.
 
-        response_text = response.choices[0].message.content
-    return render_template("index.html", response=response_text)
+            Return:
+            - focus_analysis
+            - improvements
+            - risks
+            - references
+
+            Return valid JSON only.
+            """
+        else:
+            mode = "full"
+            schema = Full_Cream_Schema
+            #system_prompt = messages
+
+            schema = schema
+            response = client.chat.completions.create(
+                model="gpt-5-mini",
+                messages=[ {"role": "system", "content": f"""
+                        You are a cosmetic formulation expert.
+                        If there is any feature found in here {detected} you MUST only return information about the mentioned features.
+                        Analyze the following input parameters for a cream formulation:
+                        {features_df}
+                        
+                        Your task is to return a structured analysis.
+
+                        IMPORTANT RULES:
+                        - Return ONLY valid JSON
+                        - Do NOT include any text before or after the JSON
+                        - Do NOT include explanations outside the JSON
+                        - Use EXACTLY the structure below
+                        - All keys and strings MUST use double quotes
+
+                        JSON STRUCTURE:
+                        {{
+                        "features": {{
+                            "mixing_time": "<value + short interpretation>",\n
+                            "temperature": "<value + short interpretation>",\n
+                            "stirring_speed": "<value + short interpretation>",\n
+                            "fat_content": "<value + short interpretation>",
+                            "water_content": "<value + short interpretation>",
+                            "ph_value": "<value + short interpretation>"
+                        }},
+                        "assessment": "<2-3 sentences explaining the predicted quality in plain English>",
+                        "improvements": [
+                            "<specific actionable improvement 1>",
+                            "<specific actionable improvement 2>",
+                            "<specific actionable improvement 3>"
+                        ],
+                        "risks": [
+                             "<specific risk 1>",
+                             "<specific risk 2>"
+                             ],
+
+                        "references": [
+                            "<reference 1>",
+                            "<reference 2>",
+                            "<reference 3>"
+                        ]
+                        }}
+
+                        CONTENT REQUIREMENTS:
+                        1. FEATURES:
+                        - Include each parameter with its given value
+                        - Add a short interpretation (e.g. 'slightly high', 'optimal', 'too low')
+
+                        2. ASSESSMENT:
+                        - Explain the quality (good / mediocre / bad) in plain English
+                        - Mention WHY (link to parameters)
+
+                        3. IMPROVEMENTS:
+                        - Give concrete, numeric suggestions where possible
+                        - Focus on how to reach "good" quality
+
+                        4. References:
+                        - Provide 2–4 realistic, domain-relevant references
+                        - These will be displayed separately in the UI under "Sources"
+
+                        FINAL RULE:
+                        Return ONLY the JSON object. No markdown, no text, no comments.
+                        """},
+                    {"role": "user", "content": user_prompt}
+                ], 
+                response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "cream_analysis",
+                "schema": schema }})
+            
+
+            data = response.choices[0].message.content
+
+            import json
+            data = json.loads(data)
+            references = data.get("references", [])
+
+    return render_template(
+        "index.html",
+        data=data,
+        references=references,
+        user_prompt=user_prompt
+     )
+        
 
 @app.route("/further_rag", methods=["GET", "POST"])
 def further_rag():
     response = None
-
+    print("hallo!")
     if request.method == "POST":
         user_query = request.form.get("prompt")
 
