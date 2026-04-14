@@ -75,7 +75,7 @@ ul {
 <h1>Welcome to the Cream Chat</h1>
 
 <form method="POST">
-    <textarea name="prompt" rows="10" cols="60" placeholder="Prompt here"></textarea>
+    <textarea name="prompt" rows="10" cols="60" placeholder="Prompt here">{{ user_prompt }}</textarea>
     <br><br>
     <button type="submit">send</button>
 </form>
@@ -97,38 +97,6 @@ ul {
   <div class="title">Focused Analysis</div>
   <p class="preline">{{ data.focus_analysis }}</p>
 </div>
-
-<!-- IMPROVEMENTS -->
-<div class="card">
-    <div class="title">Improvements</div>
-    <ul>
-        {% for item in data.improvements %}
-            <li>{{ item }}</li>
-        {% endfor %}
-    </ul>
-</div>
-
-
-<!-- RISKS -->
-<div class="card">
-    <div class="title">Risks</div>
-    <ul>
-        {% for item in data.risks %}
-            <li>{{ item }}</li>
-        {% endfor %}
-    </ul>
-</div>
-
-<!-- SOURCES -->
-<div class="card">
-    <div class="title">Sources</div>
-    <ul>
-        {% for item in data.references %}
-            <li>{{ item }}</li>
-        {% endfor %}
-    </ul>
-</div>
-
 {% endif %}
 
 
