@@ -22,6 +22,8 @@ from rag_cosmetic.rag_chain import ask_rag
 from app_data import base_features, PARAMETER_MAP
 from app_prompt import detect_parameter, build_focus_schema, Full_Cream_Schema, build_cream_prompt
 from app_predict import generate_heatmap_matrix
+from rag_cosmetic.rag_chain import get_openai_client
+
 
 print("Flask starts")
 
@@ -181,6 +183,9 @@ def index():
 @app.route("/further_rag", methods=["GET", "POST"])
 def further_rag():
     response = None
+    data = None
+    user_query = "..."
+
     print("hallo!")
     if request.method == "POST":
         user_query = request.form.get("prompt")
@@ -188,7 +193,7 @@ def further_rag():
         if user_query:
             response = ask_rag(user_query)
 
-    return render_template("index.html", response=response)
+    return render_template("rag.html", data=response, user_prompt=user_query)
 
 
 

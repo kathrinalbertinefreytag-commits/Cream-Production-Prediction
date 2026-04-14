@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<style>
+body {
+    font-family: Arial;
+    background: #f6f7fb;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+.card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.title {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+textarea {
+    width: 100%;
+    height: 120px;
+}
+
+button {
+    margin-top: 10px;
+    padding: 10px;
+}
+
+.preline {
+    white-space: pre-line;
+}
+
+.source {
+    font-size: 12px;
+    color: gray;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🔍 RAG Assistant</h1>
+
+<!-- INPUT -->
+<form method="POST">
+    <textarea name="prompt" placeholder="Ask to improve from our documents">{{ user_prompt or "" }}</textarea>
+    <button type="submit">Ask</button>
+</form>
+
+{% if data %}
+
+<!-- USER QUERY -->
+<div class="card">
+    <div class="title">Your Question</div>
+    <p class="preline">{{ user_prompt }}</p>
+</div>
+
+<!-- GENERATED ANSWER -->
+<div class="card">
+    <div class="title">Answer</div>
+    <p class="preline">{{ data.answer }}</p>
+</div>
+
+<!-- RETRIEVED DOCUMENTS -->
+<div class="card">
+    <div class="title">Retrieved Context</div>
+
+    {% for doc in data.context %}
+        <div style="margin-bottom:10px;">
+            <div class="source">
+                {{ doc.source }} (Score: {{ doc.score }})
+            </div>
+            <div class="preline">
+                {{ doc.text }}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- SOURCES (SEPARATE) -->
+<div class="card">
+    <div class="title">Sources</div>
+    <ul>
+        {% for s in data.sources %}
+            <li>{{ s }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endif %}
+
+</div>
+</body>
+</html>

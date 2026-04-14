@@ -1,10 +1,12 @@
 import os
 from openai import OpenAI
-from chromadb.config import Settings
 import chromadb
 from ingestion.extract import extract_text_from_pdf
 from ingestion.chunk import chunk_text
 from dotenv import load_dotenv
+from vectorstore_client import get_chroma_client
+
+print("INGEST START")
 
 load_dotenv()
 
@@ -15,12 +17,8 @@ if not OPENAI_API_KEY:
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # creating Chroma client and Collection 
-chroma_client = chromadb.Client(
-    Settings(persist_directory="./chroma_db")  # speichert DB lokal
-)
-
-# creating Collection 
-collection = chroma_client.get_or_create_collection(name="cream_docs")
+chroma_client = get_chroma_client()
+collection = chroma_client.get_or_create_collection("cream_docs")
 
 # reading PDFs, chunking and embedding 
 pdf_files = [
@@ -60,5 +58,5 @@ for i, chunk in enumerate(chunks):
         ids=[str(i)],
         metadatas=[metadata[i]]
     )
-
+print("COUNT AFTER INGEST:", collection.count())
 print("Ingestion complete!")

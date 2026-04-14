@@ -12,13 +12,13 @@ def get_openai_client():
 
 
 def format_docs(docs):
-    return "\n\n".join([doc.page_content for doc in docs])
+    return "\n\n".join([doc["content"] for doc in docs])
 
 
 def ask_rag(question: str):
     retriever = get_retriever()
 
-    # 🔍 relevante Dokumente holen
+    # takes relevant docs
     docs = retriever.invoke(question)
 
     context = format_docs(docs)
@@ -36,18 +36,18 @@ Question:
 {question}
 """
 
-    # 🤖 OpenAI Call
+    # OpenAI Call
     client = get_openai_client()
     response = client.responses.create(
-        model="gpt-5.3-mini",
+        model="gpt-4.1-mini",
         input=prompt
     )
 
     answer = response.output_text
 
-    # 📚 Quellen extrahieren
+    # extracting sources
     sources = [
-        doc.metadata.get("source", "unknown")
+        doc["metadata"].get("source", "unknown")
         for doc in docs
     ]
 
