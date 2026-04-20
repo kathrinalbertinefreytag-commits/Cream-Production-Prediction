@@ -1,5 +1,4 @@
-# wann und wo 
-# X_new_scaled = scaler.transform(X_new)
+
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
 import pandas as pd
 import numpy as np
@@ -9,14 +8,10 @@ import matplotlib.pyplot as plt
 import joblib
 import json
 import plotly
-from dash import Dash, dcc, html, Input, Output
 import plotly.graph_objects as go
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
-import seaborn as sns
-import io
-import base64
 from flask import Flask, request, jsonify, render_template
 from rag_cosmetic.rag_chain import ask_rag  
 from app_data import base_features, PARAMETER_MAP
