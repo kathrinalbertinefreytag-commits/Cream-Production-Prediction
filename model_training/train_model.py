@@ -1,4 +1,4 @@
-from data_preparation import prepare_data
+from model_training.data_preparation import prepare_data
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
