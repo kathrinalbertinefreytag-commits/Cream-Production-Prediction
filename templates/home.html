@@ -57,7 +57,12 @@
         else 'red'
     %}
 
-    <span style="color: {{ color }};">
+    <span style="
+    background-color: darkblue;
+    color: {{ color }};
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: bold;">
         {{ quality_pred }}
     </span>
 
@@ -67,8 +72,16 @@
 
 <br></br>
 
-<a href="{{ url_for ('heatmap') }} ">to the heatmap</a>
-
+<a href="{{ url_for('heatmap',
+    temperature=request.form.temperature,
+    fat_content=request.form.fat_content,
+    mixing_time=request.form.mixing_time,
+    stirring_speed=request.form.stirring_speed,
+    water_content=request.form.water_content,
+    ph_value=request.form.ph_value
+) }}">
+    to the heatmap
+</a>
 <br></br>
 
 <a href="{{url_for ('index')}}">how do I improve this batch?</a>

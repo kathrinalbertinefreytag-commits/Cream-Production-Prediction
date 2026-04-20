@@ -9,7 +9,7 @@
 
 <body>
     <h1>Heatmap: Creamquality</h1>
-
+    <p> Yellow is good.  Green: mediocre.  Bluered: very bad.</p>
     <form method="POST">
         <label>X-axis:</label>
         <select name="x_param">
@@ -25,6 +25,7 @@
         <option value="temperature" {% if y_param == 'temperature' %}selected{% endif %}>Temperature</option>
     </select>
         
+        
 
         <button type="submit">actualize</button>
     </form>
@@ -35,7 +36,7 @@
         var graphs = {{ graphJson | safe }};
         Plotly.newPlot("heatmap", graphs.data, graphs.layout);
     </script>
-
+    
     <a href="{{ url_for('home') }}">back to prediction</a>
 
 </body>

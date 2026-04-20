@@ -58,7 +58,7 @@ button {
 <!-- INPUT -->
 <form method="POST">
     <textarea name="prompt" placeholder="Ask to improve from our documents">{{ user_prompt or "" }}</textarea>
-    <button type="submit">Ask</button>
+    <button type="submit">Search in the documents</button>
 </form>
 
 {% if data %}
@@ -104,5 +104,9 @@ button {
 {% endif %}
 
 </div>
+<br></br>
+<a href="{{ url_for('home') }}">back to prediction</a>
+<br></br>
+<a href="{{url_for ('index')}}">online search</a>
 </body>
 </html>

@@ -93,21 +93,27 @@ def home():
 @app.route("/heatmap", methods=["GET", "POST"])
 def heatmap():
 
-    # Standardwerte nur für GET
-    x_param = "temperature"
-    y_param = "fat_content"
-
-    print(x_param, y_param)
+    x_param = request.args.get("x_param", "temperature")
+    y_param = request.args.get("y_param", "fat_content")
+    x_val = request.args.get(x_param)
+    y_val = request.args.get(y_param)
+    print(x_param, y_param, x_val, y_val)
 
     if request.method == "POST":
         x_param = request.form.get("x_param", x_param) or x_param
         y_param = request.form.get("y_param", y_param) or y_param
+        x_raw = request.form.get(x_param)
+        y_raw = request.form.get(y_param)
+        print("RAW:", x_raw, y_raw)
 
-        print(f"hallo!",x_param, y_param)
+        if x_raw is not None and y_raw is not None:
+                x_val = float(x_raw)
+                y_val =     float(y_raw)
+                print(f"hallo!",x_param, y_param)
 
     # Matrix erzeugen
     matrix = generate_heatmap_matrix(x_param, y_param)
-
+    
     # Labels aus Ranges
     ranges = {
         "mixing_time": [5,10,15,20,25],
@@ -120,6 +126,7 @@ def heatmap():
 
     x_labels = ranges[x_param]
     y_labels = ranges[y_param]
+    
 
     fig = go.Figure(
         data=go.Heatmap(
@@ -130,6 +137,20 @@ def heatmap():
         )
     )
 
+    if x_val is not None and y_val is not None:
+        try:
+            fig.add_trace(
+                go.Scatter(
+                    x=[float(x_val)],
+                    y=[float(y_val)],
+                    mode='markers',
+                    marker=dict(color='red', size=12, symbol='x'),
+                    name='Input'
+                )
+            )
+        except Exception as e:
+            print("Scatter error:", e)
+    
     fig.update_layout(
         title="Cream Quality Heatmap",
         xaxis_title=x_param,
