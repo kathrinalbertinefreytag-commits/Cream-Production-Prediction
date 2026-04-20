@@ -12,7 +12,6 @@ import plotly.graph_objects as go
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
-from flask import Flask, request, jsonify, render_template
 from rag_cosmetic.rag_chain import ask_rag  
 from app_data import base_features, PARAMETER_MAP
 from app_prompt import detect_parameter, build_focus_schema, Full_Cream_Schema, build_cream_prompt
