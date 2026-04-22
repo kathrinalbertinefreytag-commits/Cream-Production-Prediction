@@ -17,6 +17,7 @@ from app_data import base_features, PARAMETER_MAP
 from app_prompt import detect_parameter, build_focus_schema, Full_Cream_Schema, build_cream_prompt
 from app_predict import generate_heatmap_matrix
 from rag_cosmetic.rag_chain import get_openai_client
+import plotly.colors as pc
 
 
 print("Flask starts")
@@ -86,7 +87,7 @@ def home():
 
 @app.route("/heatmap", methods=["GET", "POST"])
 def heatmap():
-
+    graphJson = None
     x_param = request.args.get("x_param", "temperature")
     y_param = request.args.get("y_param", "fat_content")
     x_val = request.args.get(x_param)
@@ -102,12 +103,13 @@ def heatmap():
 
         if x_raw is not None and y_raw is not None:
                 x_val = float(x_raw)
-                y_val =     float(y_raw)
+                y_val = float(y_raw)
                 print(f"hallo!",x_param, y_param)
 
     # Matrix erzeugen
     matrix = generate_heatmap_matrix(x_param, y_param)
-    
+    matrix = [[float(v) if v is not None else 0.0 for v in row] for row in matrix]#eingefügt
+
     # Labels aus Ranges
     ranges = {
         "mixing_time": [5,10,15,20,25],
@@ -133,6 +135,34 @@ def heatmap():
 
     if x_val is not None and y_val is not None:
         try:
+            x_idx = min(range(len(x_labels)), key=lambda i: abs(x_labels[i] - float(x_val)))
+            y_idx = min(range(len(y_labels)), key=lambda i: abs(y_labels[i] - float(y_val)))
+            z_val = matrix[y_idx][x_idx]
+        
+            z_min = min(min(row) for row in matrix)
+            z_max = max(max(row) for row in matrix)
+            z_norm = (z_val - z_min) / (z_max - z_min) if z_max != z_min else 0.5
+
+            halo_color = pc.sample_colorscale("Viridis", z_norm)[0]
+            rgb_values = halo_color.replace("rgb(", "").replace(")", "").split(",")
+            halo_rgba = f"rgba({rgb_values[0]},{rgb_values[1]},{rgb_values[2]}, 0.8)"
+
+            fig.add_trace(
+                go.Scatter(
+                    x=[float(x_val)],
+                    y=[float(y_val)],
+                    mode='markers',
+                    marker=dict(
+                    color=halo_rgba,
+                    size=24,
+                    symbol='circle',
+                    line=dict(color='white', width=1)),
+                    name='Input'
+
+                )
+            )
+            
+
             fig.add_trace(
                 go.Scatter(
                     x=[float(x_val)],
@@ -140,18 +170,25 @@ def heatmap():
                     mode='markers',
                     marker=dict(color='red', size=12, symbol='x'),
                     name='Input'
+                
                 )
             )
+            
         except Exception as e:
             print("Scatter error:", e)
+        
+        
     
+    print("FIG DATA:", fig.data)
     fig.update_layout(
         title="Cream Quality Heatmap",
         xaxis_title=x_param,
         yaxis_title=y_param
     )
 
+    
     graphJson = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    
 
     return render_template(
         "heatmap.html",

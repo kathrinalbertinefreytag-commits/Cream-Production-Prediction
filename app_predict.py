@@ -11,7 +11,12 @@ features_df = pd.DataFrame([], columns=feature_order)
 def predict_cream_quality(params):
     df = pd.DataFrame([params])[feature_order]
     pred = pipeline.predict(df)[0]
-    return int(pred)
+    try:
+        return float(pred)
+    except:
+        return 0.0
+    #return int(pred) 
+    
 
 def generate_heatmap_matrix(x_param, y_param, fixed_params=None):
     if fixed_params is None:
@@ -52,6 +57,15 @@ def generate_heatmap_matrix(x_param, y_param, fixed_params=None):
             print("DEBUG Params:", params)
 
             score = predict_cream_quality(params)
+            #security for colorful illustration
+            if score is None:
+                score = 0
+            else:
+                try:
+                    score = float(score)
+                except:
+                    score = 0
+
             row.append(score)
         matrix.append(row)
 
