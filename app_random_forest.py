@@ -113,12 +113,17 @@ def heatmap():
     matrix = generate_heatmap_matrix(x_param, y_param)
     matrix = [[float(v) if v is not None else 0.0 for v in row] for row in matrix]#eingefügt
 
+    print("x_param:", x_param, "y_param:", y_param)
+    print("matrix:")
+    for row in matrix:
+        print(row)
+
     # Labels aus Ranges
     ranges = {
-        "mixing_time": [5,10,15,20,25],
-        "temperature": [50,60,70,80,90],
-        "stirring_speed": [100,200,300,400,500],
-        "fat_content": [5,10,15,20],
+        "mixing_time": [5,10,15,20,25,30,40],
+        "temperature": [50,60,70,80,90,120],
+        "stirring_speed": [-10, 0, 100,200,300,400,500],
+        "fat_content": [5,10,15,20,70],
         "water_content": [60,70,80,90],
         "ph_value": [5.5,6,6.5,7,7.5]
     }
@@ -132,7 +137,8 @@ def heatmap():
             z=matrix,
             x=x_labels,
             y=y_labels,
-            colorscale="Viridis"
+            colorscale="RdYlGn",
+            
         )
     )
 
@@ -146,7 +152,7 @@ def heatmap():
             z_max = max(max(row) for row in matrix)
             z_norm = (z_val - z_min) / (z_max - z_min) if z_max != z_min else 0.5
 
-            halo_color = pc.sample_colorscale("Viridis", z_norm)[0]
+            halo_color = pc.sample_colorscale("RdYlGn", [z_norm])[0]
             rgb_values = halo_color.replace("rgb(", "").replace(")", "").split(",")
             halo_rgba = f"rgba({rgb_values[0]},{rgb_values[1]},{rgb_values[2]}, 0.8)"
 

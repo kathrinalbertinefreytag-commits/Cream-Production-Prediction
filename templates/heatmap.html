@@ -9,13 +9,14 @@
 
 <body>
     <h1>Heatmap: Creamquality</h1>
-    <p> Yellow is good.  Green: mediocre.  Bluered: very bad.</p>
+    <p> welche Farbe bedeutet was?</p>
     <form method="POST">
         <label>X-axis:</label>
         <select name="x_param">
             <option value="temperature" {% if x_param == 'temperature' %}selected{% endif %}>Temperature</option>
             <option value="fat_content" {% if x_param == 'fat_content' %}selected{% endif %}>Oil fraction</option>
             <option value="water_content" {% if x_param == 'water_content' %}selected{% endif %}>Water fraction</option>
+            <option value="stirring_speed" {% if x_param== 'stirring_speed'%}selected{% endif%}>Stirring Speed</option>
         </select>
 
         <label>Y-axis:</label>
@@ -23,6 +24,7 @@
         <option value="mixing_time" {% if y_param == 'mixing_time' %}selected{% endif %}>Mixing Time</option>
         <option value="fat_content" {% if y_param == 'fat_content' %}selected{% endif %}>Fat Content</option>
         <option value="temperature" {% if y_param == 'temperature' %}selected{% endif %}>Temperature</option>
+        <option value="stirring_speed" {% if y_param== 'stirring_speed'%}selected{% endif%}>Stirring Speed</option>
     </select>
         
         
